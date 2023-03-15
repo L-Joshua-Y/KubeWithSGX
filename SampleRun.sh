@@ -1,9 +1,11 @@
 #!/bin/bash
 echo "Sample Enclave"
-/opt/alibaba/SGXProgram/SampleCode/SampleEnclave/app
+cd /opt/alibaba/SGXProgram/SampleCode/SampleEnclave && ./app
 
+echo ""
 echo "Generate Quote"
-/opt/alibaba/SGXProgram/SampleCode/QuoteGenerationSample/app
+cd /opt/alibaba/SGXProgram/SampleCode/QuoteGenerationSample && ./app
 
+echo ""
 echo "Verify Quote"
-/opt/alibaba/SGXProgram/SampleCode/QuoteVerificationSample/app
+cd /opt/alibaba/SGXProgram/SampleCode/QuoteVerificationSample && ./app
