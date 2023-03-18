@@ -25,3 +25,9 @@ spec:
         allowPrivilegeEscalation: false
         capabilities:
           add: ["IPC_LOCK"]
+      volumeMounts:
+        - name: ephemeral
+          mountPath: /tmp/SGXSampleCode
+  volumes:
+    - name: ephemeral
+      emptyDir: {}

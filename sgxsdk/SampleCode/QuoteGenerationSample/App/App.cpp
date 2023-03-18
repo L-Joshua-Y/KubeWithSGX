@@ -40,6 +40,7 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #if defined(_MSC_VER)
 #include <Windows.h>
 #include <tchar.h>
@@ -57,9 +58,15 @@
 #define SGX_AESM_ADDR "SGX_AESM_ADDR"
 #if defined(_MSC_VER)
 #define ENCLAVE_PATH _T("enclave.signed.dll")
+#define DEFAULT_QUOTE ".\\quote.dat"
+
+#define strncpy strncpy_s
 #else
 #define ENCLAVE_PATH "enclave.signed.so"
+#define DEFAULT_QUOTE "./quote.dat"
 #endif
+
+#define PATHSIZE 0x418U
 
 bool create_app_enclave_report(sgx_target_info_t qe_target_info, sgx_report_t* app_report)
 {
@@ -96,10 +103,33 @@ CLEANUP:
     sgx_destroy_enclave(eid);
     return ret;
 }
+
+void usage()
+{
+    printf("\nUsage:\n");
+    printf("\tPlease specify quote path, e.g. \"./app -quote <path/to/quote>\"\n");
+    printf("\tDefault quote path is %s when no command line args\n\n", DEFAULT_QUOTE);
+}
+
 int main(int argc, char* argv[])
 {
-    (void)(argc);
-    (void)(argv);
+    char quote_path[PATHSIZE] = { '\0' };
+
+    // Just for sample use, better to change solid command line args solution in production env
+    if (argc != 1 && argc != 3) {
+        usage();
+        return 0;
+    }
+
+    if (argv[1] && argv[2]) {
+        if (!strcmp(argv[1], "-quote")) {
+            strncpy(quote_path, argv[2], PATHSIZE - 1);
+        }
+    }
+
+    if (*quote_path == '\0') {
+        strncpy(quote_path, DEFAULT_QUOTE, PATHSIZE - 1);
+    }
 
     int ret = 0;
     quote3_error_t qe3_ret = SGX_QL_SUCCESS;
@@ -210,9 +240,9 @@ int main(int argc, char* argv[])
     printf("cert_key_type = 0x%x\n", p_cert_data->cert_key_type);
 
 #if _WIN32
-    fopen_s(&fptr, "./quote.dat", "wb");
+    fopen_s(&fptr, quote_path, "wb");
 #else
-    fptr = fopen("./quote.dat", "wb");
+    fptr = fopen(quote_path, "wb");
 #endif
     if (fptr) {
         printf("Open quote.dat successfully.\n");
