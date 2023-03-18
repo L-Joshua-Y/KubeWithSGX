@@ -5,7 +5,7 @@ FROM alibaba-cloud-linux-3-registry.cn-hangzhou.cr.aliyuncs.com/alinux3/alinux3:
 
 ## install SDK and other dependencies
 RUN region_id=cn-shanghai && \
-    yum install -y yum-utils && \
+    yum install -y wget yum-utils && \
     yum-config-manager --add-repo \
     https://enclave-${region_id}.oss-${region_id}-internal.aliyuncs.com/repo/alinux/enclave-expr.repo; \
     yum install -y sgxsdk; \
