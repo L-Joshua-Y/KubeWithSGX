@@ -1,6 +1,9 @@
 # v1.2
+
+## builder for compiling
 FROM alibaba-cloud-linux-3-registry.cn-hangzhou.cr.aliyuncs.com/alinux3/alinux3:220901.1 AS builder
 
+## install SDK and other dependencies
 RUN region_id=cn-shanghai && \
     yum install -y yum-utils && \
     yum-config-manager --add-repo \
@@ -9,11 +12,14 @@ RUN region_id=cn-shanghai && \
     yum groupinstall -y "Development Tools"; \
     yum install -y libsgx-dcap-ql-devel libsgx-dcap-quote-verify-devel;
 
+## modify source code
+RUN cd /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/QuoteGenerationSample/App && \
+    rm -f ./App.cpp && wget https://raw.githubusercontent.com/L-Joshua-Y/KubeWithSGX/main/sgxsdk/SampleCode/QuoteGenerationSample/App/App.cpp -O ./App.cpp;
+
+## compile and sign
 RUN source /opt/alibaba/teesdk/intel/sgxsdk/environment && \
     cd /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/SampleEnclave && \
     make; \
-    cd /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/QuoteGenerationSample/App && \
-    rm -f ./App.cpp && wget https://raw.githubusercontent.com/L-Joshua-Y/KubeWithSGX/main/sgxsdk/SampleCode/QuoteGenerationSample/App/App.cpp -O ./App.cpp; \
     source /opt/alibaba/teesdk/intel/sgxsdk/environment && \
     cd /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/QuoteGenerationSample && \
     make; \
@@ -23,8 +29,10 @@ RUN source /opt/alibaba/teesdk/intel/sgxsdk/environment && \
     sgx_sign sign -key Enclave/Enclave_private_sample.pem -enclave enclave.so -out enclave.signed.so -config Enclave/Enclave.config.xml;
 
 
+## stage for executing
 FROM alibaba-cloud-linux-3-registry.cn-hangzhou.cr.aliyuncs.com/alinux3/alinux3:220901.1
 
+## install PSW
 RUN region_id=cn-shanghai && \
     yum install -y wget yum-utils && \
     yum-config-manager --add-repo \
@@ -36,6 +44,7 @@ RUN region_id=cn-shanghai && \
     libsgx-qe3-logic libsgx-quote-ex libsgx-ra-network libsgx-ra-uefi \
     libsgx-uae-service libsgx-urts sgx-ra-service sgx-aesm-service;
 
+## configure remote attestation config file
 RUN region_id=cn-shanghai && \ 
     PCCS_URL=https://sgx-dcap-server-vpc.${region_id}.aliyuncs.com/sgx/certification/v3/ && \
     echo "PCCS_URL=${PCCS_URL}" >> /etc/sgx_default_qcnl.conf && \
@@ -46,11 +55,9 @@ RUN region_id=cn-shanghai && \
     wget https://raw.githubusercontent.com/L-Joshua-Y/KubeWithSGX/main/tag/v1.2/SampleRun.sh -O /opt/alibaba/SGXProgram/SampleRun.sh && \
     chmod +x /opt/alibaba/SGXProgram/SampleRun.sh
 
-COPY --from=builder /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/SampleEnclave/app /opt/alibaba/SGXProgram/SampleCode/SampleEnclave/app
-COPY --from=builder /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/SampleEnclave/enclave.signed.so /opt/alibaba/SGXProgram/SampleCode/SampleEnclave/enclave.signed.so
-COPY --from=builder /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/QuoteGenerationSample/app /opt/alibaba/SGXProgram/SampleCode/QuoteGenerationSample/app
-COPY --from=builder /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/QuoteGenerationSample/enclave.signed.so /opt/alibaba/SGXProgram/SampleCode/QuoteGenerationSample/enclave.signed.so
-COPY --from=builder /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/QuoteVerificationSample/app /opt/alibaba/SGXProgram/SampleCode/QuoteVerificationSample/app
-COPY --from=builder /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/QuoteVerificationSample/enclave.signed.so /opt/alibaba/SGXProgram/SampleCode/QuoteVerificationSample/enclave.signed.so
+## copy binary files
+COPY --from=builder /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/SampleEnclave/app /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/SampleEnclave/enclave.signed.so /opt/alibaba/SGXProgram/SampleCode/SampleEnclave/
+COPY --from=builder /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/QuoteGenerationSample/app /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/QuoteGenerationSample/enclave.signed.so /opt/alibaba/SGXProgram/SampleCode/QuoteGenerationSample/
+COPY --from=builder /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/QuoteVerificationSample/app /opt/alibaba/teesdk/intel/sgxsdk/SampleCode/QuoteVerificationSample/enclave.signed.so /opt/alibaba/SGXProgram/SampleCode/QuoteVerificationSample/
 
 CMD [ "/opt/alibaba/SGXProgram/SampleRun.sh" ]
