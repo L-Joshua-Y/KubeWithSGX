@@ -220,9 +220,9 @@ int main(int argc, char* argv[])
         fclose(fptr);
     } else {
         printf("Failed to open quote.dat\n");
-        char* byte_array = (char*)p_quote;
+        uint8_t* byte_array = (uint8_t*)p_quote;
         for (uint32_t i = 0; i < quote_size; ++i) {
-            int temp_max_id = i + 48 < quote_size ? (i + 48) : quote_size;
+            uint32_t temp_max_id = i + 48 < quote_size ? (i + 48) : quote_size;
             for (; i < temp_max_id; ++i) {
                 printf("%.2x ", *(byte_array + i));
             }
