@@ -1,7 +1,7 @@
 FROM ubuntu:focal AS builder
 
 ## install prerequisites
-RUN apt update && apt install -y apt install build-essential ocaml-nox \ 
+RUN apt update && apt -y install build-essential ocaml-nox \ 
     automake autoconf libtool wget python-is-python3 libssl-dev dkms git;
 
 ## install SDK
@@ -23,6 +23,7 @@ RUN cd /opt/intel/sgxsdk/SampleCode && \
     git clone https://github.com/intel/SGXDataCenterAttestationPrimitives.git && \
     cp -r ./SGXDataCenterAttestationPrimitives/SampleCode/QuoteGenerationSample/ ./QuoteGenerationSample/ && \
     cp -r ./SGXDataCenterAttestationPrimitives/SampleCode/QuoteVerificationSample/ ./QuoteVerificationSample/ && \
+    rm -rf ./SGXDataCenterAttestationPrimitives && \
     cd ./QuoteVerificationSample/ && \
     openssl genrsa -out Enclave/Enclave_private_sample.pem -3 3072; \
     cd /opt/intel/sgxsdk/SampleCode/QuoteGenerationSample/App && \
