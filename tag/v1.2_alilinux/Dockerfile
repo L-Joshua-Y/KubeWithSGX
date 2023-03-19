@@ -44,7 +44,7 @@ RUN region_id=cn-shanghai && \
     libsgx-qe3-logic libsgx-quote-ex libsgx-ra-network libsgx-ra-uefi \
     libsgx-uae-service libsgx-urts sgx-ra-service sgx-aesm-service;
 
-## configure remote attestation config file
+## configure remote attestation config file and get shell script
 RUN region_id=cn-shanghai && \ 
     PCCS_URL=https://sgx-dcap-server-vpc.${region_id}.aliyuncs.com/sgx/certification/v3/ && \
     echo "PCCS_URL=${PCCS_URL}" >> /etc/sgx_default_qcnl.conf && \
@@ -52,7 +52,7 @@ RUN region_id=cn-shanghai && \
     mkdir -p /opt/alibaba/SGXProgram/SampleCode/SampleEnclave && \
     mkdir -p /opt/alibaba/SGXProgram/SampleCode/QuoteGenerationSample && \
     mkdir -p /opt/alibaba/SGXProgram/SampleCode/QuoteVerificationSample; \
-    wget https://raw.githubusercontent.com/L-Joshua-Y/KubeWithSGX/main/tag/v1.2/SampleRun.sh -O /opt/alibaba/SGXProgram/SampleRun.sh && \
+    wget https://raw.githubusercontent.com/L-Joshua-Y/KubeWithSGX/main/tag/v1.2_alilinux/SampleRun.sh -O /opt/alibaba/SGXProgram/SampleRun.sh && \
     chmod +x /opt/alibaba/SGXProgram/SampleRun.sh
 
 ## copy binary files

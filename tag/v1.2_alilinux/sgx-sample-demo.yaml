@@ -5,7 +5,7 @@ metadata:
   namespace: default
 spec:
   containers:
-    - image: ljoshuay/sgx_sample_code:v1.2
+    - image: ljoshuay/sgx_sample_code:v1.2_alilinux
       imagePullPolicy: IfNotPresent
       name: sgx-sample-code
       workingDir: "/opt/alibaba/SGXProgram/"
