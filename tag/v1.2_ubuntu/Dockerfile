@@ -31,24 +31,23 @@ RUN cd /opt/intel/sgxsdk/SampleCode && \
     wget https://raw.githubusercontent.com/L-Joshua-Y/KubeWithSGX/main/sgxsdk/SampleCode/QuoteGenerationSample/App/App.cpp -O ./App.cpp;
 
 ## compile sample code
-RUN source /opt/intel/sgxsdk/environment && \
+RUN /bin/bash -c "source /opt/intel/sgxsdk/environment && \
     cd /opt/intel/sgxsdk/SampleCode/SampleEnclave && \
-    make; \
-    source /opt/intel/sgxsdk/environment && \
+    make"; \
+    /bin/bash -c "source /opt/intel/sgxsdk/environment && \
     cd /opt/intel/sgxsdk/SampleCode/QuoteGenerationSample && \
-    make; \
-    source /opt/intel/sgxsdk/environment && \
+    make"; \
+    /bin/bash -c "source /opt/intel/sgxsdk/environment && \
     cd /opt/intel/sgxsdk/SampleCode/QuoteVerificationSample && \
     make && \
-    sgx_sign sign -key Enclave/Enclave_private_sample.pem -enclave enclave.so -out enclave.signed.so -config Enclave/Enclave.config.xml;
+    sgx_sign sign -key Enclave/Enclave_private_sample.pem -enclave enclave.so -out enclave.signed.so -config Enclave/Enclave.config.xml";
 
 
 # stage
 FROM ubuntu:focal
 
 ## install prerequisites
-RUN apt update && apt install -y apt install build-essential ocaml-nox \ 
-    automake autoconf libtool wget python-is-python3 libssl-dev dkms; \
+RUN apt update && apt install -y wget gnupg; \
     mkdir -p /opt/intel/sgxsdk/SampleCode/SampleEnclave && \
     mkdir -p /opt/intel/sgxsdk/SampleCode/QuoteGenerationSample && \
     mkdir -p /opt/intel/sgxsdk/SampleCode/QuoteVerificationSample;
@@ -63,7 +62,7 @@ RUN echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu foc
 RUN rm -f /etc/sgx_default_qcnl.conf && \
     wget https://raw.githubusercontent.com/L-Joshua-Y/KubeWithSGX/main/tag/v1.2_ubuntu/sgx_default_qcnl.conf -O /etc/sgx_default_qcnl.conf; \
     wget https://raw.githubusercontent.com/L-Joshua-Y/KubeWithSGX/main/tag/v1.2_ubuntu/SampleRun.sh -O /opt/intel/sgxsdk/SampleCode/SampleRun.sh && \
-    chmod +x /opt/intel/sgxsdk/SampleCode/SampleRun.sh
+    chmod +x /opt/intel/sgxsdk/SampleCode/SampleRun.sh;
 
 COPY --from=builder /opt/intel/sgxsdk/SampleCode/SampleEnclave/app /opt/intel/sgxsdk/SampleCode/SampleEnclave/enclave.signed.so /opt/intel/sgxsdk/SampleCode/SampleEnclave/
 COPY --from=builder /opt/intel/sgxsdk/SampleCode/QuoteGenerationSample/app /opt/intel/sgxsdk/SampleCode/QuoteGenerationSample/enclave.signed.so /opt/intel/sgxsdk/SampleCode/QuoteGenerationSample/
