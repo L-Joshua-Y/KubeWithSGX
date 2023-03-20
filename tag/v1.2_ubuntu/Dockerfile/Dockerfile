@@ -58,7 +58,7 @@ RUN echo 'deb [arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu foc
     apt update && apt -y install libsgx-epid libsgx-quote-ex libsgx-dcap-ql libsgx-dcap-default-qpl \ 
     libsgx-dcap-ql-dev libsgx-quote-ex-dev libsgx-dcap-quote-verify libsgx-dcap-quote-verify-dev;
 
-## configure PCCS
+## configure PCCS and add shell script
 RUN rm -f /etc/sgx_default_qcnl.conf && \
     wget https://raw.githubusercontent.com/L-Joshua-Y/KubeWithSGX/main/tag/v1.2_ubuntu/sgx_default_qcnl.conf -O /etc/sgx_default_qcnl.conf; \
     wget https://raw.githubusercontent.com/L-Joshua-Y/KubeWithSGX/main/tag/v1.2_ubuntu/SampleRun.sh -O /opt/intel/sgxsdk/SampleCode/SampleRun.sh && \
