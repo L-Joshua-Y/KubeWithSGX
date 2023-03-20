@@ -71,9 +71,10 @@ RUN mkdir -p /opt/intel/ && \
     mkdir -p /opt/intel/sgxsdk/SampleCode/QuoteVerificationSample;
 
 ## install PSW
-RUN dnf --nogpgcheck -y install libsgx-urts libsgx-launch libsgx-epid libsgx-quote-ex \ 
-    libsgx-dcap-ql libsgx-dcap-default-qpl; \
-    dnf --nogpgcheck -y install libsgx-dcap-quote-verify;
+RUN yum install -y https://mirrors.cloud.tencent.com/redhat/rhel/rhel-8-beta/appstream/x86_64/Packages/protobuf-3.5.0-7.el8.x86_64.rpm && \
+    yum --nogpgcheck -y install libsgx-urts libsgx-launch libsgx-epid libsgx-quote-ex \ 
+    libsgx-dcap-ql libsgx-dcap-default-qpl \
+    libsgx-dcap-ql-devel libsgx-quote-ex-devel libsgx-dcap-quote-verify libsgx-dcap-quote-verify-devel;
 
 ## configure PCCS and add shell script
 RUN rm -f /etc/sgx_default_qcnl.conf && \
